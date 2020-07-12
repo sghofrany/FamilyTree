@@ -1,0 +1,19 @@
+{
+  "name": "familytree",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/irantwomiles/familytree.git"
+  },
+  "author": "Shayan Ghofrany",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/irantwomiles/familytree/issues"
+  },
+  "homepage": "https://github.com/irantwomiles/familytree#readme"
+}
