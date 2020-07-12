@@ -8,12 +8,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/irantwomiles/familytree.git"
+    "url": "git+https://github.com/Irantwomiles/FamilyTree.git"
   },
   "author": "Shayan Ghofrany",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/irantwomiles/familytree/issues"
+    "url": "https://github.com/Irantwomiles/FamilyTree/issues"
   },
-  "homepage": "https://github.com/irantwomiles/familytree#readme"
+  "homepage": "https://github.com/Irantwomiles/FamilyTree#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "mongoose": "^5.9.23"
+  }
 }
