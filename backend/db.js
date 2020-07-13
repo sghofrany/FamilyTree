@@ -1,6 +1,4 @@
 
-require('dotenv').config()
-
 console.log(process.env.MONGO_USER, process.env.MONGO_PASS, process.env.MONGO_DB)
 
 const mongoose = require('mongoose')
