@@ -1,5 +1,7 @@
 const express = require('express')
 const postRouter = express.Router()
+const Person = require('../models/Person')
+const { v4: uuidv4 } = require('uuid')
 
 /**
  * This is run everytime any of the routes bellow are called.
@@ -19,8 +21,43 @@ postRouter.use(function(req, res, next) {
     next()
 })
 
-postRouter.post('/', function(req, res) {
-    console.log(req.body.test)
+postRouter.post('/create', function(req, res) {
+
+    var firstName = req.body.firstName
+    var lastName = req.body.lastName
+    var dob = req.body.dob
+
+    var person = new Person({
+        first_name: firstName,
+        last_name: lastName,
+        dob: dob,
+        id: uuidv4(),
+        father: {
+            first_name: "",
+            last_name: "",
+            dob: "",
+            id: ""
+        },
+        mother: {
+            first_name: "",
+            last_name: "",
+            dob: "",
+            id: ""
+        },
+        siblings: []
+    })
+
+    person.save(function(err) {
+        if(err) {
+            console.log("error while creating a new document", err)
+            res.sendStatus(400)
+            return
+        }
+ 
+        console.log("Document saved successfully!")
+
+    })
+
     res.sendStatus(200)
 })
 
