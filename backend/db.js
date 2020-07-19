@@ -7,6 +7,11 @@ const MONGO_URL = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_P
 
 mongoose.connect(MONGO_URL, { useNewUrlParser: true });
 
+mongoose.set('useNewUrlParser', true);
+mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true);
+mongoose.set('useUnifiedTopology', true);
+
 function databaseConnection() {
 
     mongoose.connection

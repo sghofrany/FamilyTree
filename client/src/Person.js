@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useHistory } from 'react-router-dom'
 import axios from 'axios'
 
 function Person() {
@@ -11,6 +12,8 @@ function Person() {
     const handleFirstChange = (e) => setFirstName(e.target.value)
     const handleLastChange = (e) => setLastName(e.target.value)
     const handleDobChange = (e) => setDob(e.target.value)
+
+    let history = useHistory()
 
     const handleAddButton = (e) => {
         e.preventDefault()
@@ -25,7 +28,7 @@ function Person() {
 
         setLoading(true)
 
-        axios.post("http://localhost:5000/api/create", {
+        axios.post(`http://localhost:5000/api/create/`, {
             firstName: firstName,
             lastName: lastName,
             dob: dob
@@ -35,7 +38,7 @@ function Person() {
             setLoading(false)
 
             if(response.status === 200) {
-                //redirect
+                history.push(`/${response.data.id}`)
             }
         })
         .catch((error) => {

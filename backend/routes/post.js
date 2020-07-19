@@ -26,12 +26,13 @@ postRouter.post('/create', function(req, res) {
     var firstName = req.body.firstName
     var lastName = req.body.lastName
     var dob = req.body.dob
+    var id = uuidv4()
 
     var person = new Person({
         first_name: firstName,
         last_name: lastName,
         dob: dob,
-        id: uuidv4(),
+        id: id,
         father: {
             first_name: "",
             last_name: "",
@@ -58,7 +59,61 @@ postRouter.post('/create', function(req, res) {
 
     })
 
-    res.sendStatus(200)
+    res.send({status: 200, id: id})
+})
+
+postRouter.post('/update/:id', function(req, res) {
+  
+    let siblings = req.body.siblings
+    let arr = []
+
+    for(var i = 0; i < siblings.length; i++) {
+        arr.push({
+            first_name: siblings[i].first_name,
+            last_name: siblings[i].last_name,
+            dob: siblings[i].dob,
+            id: siblings[i].id
+        })
+    }
+
+    const update = {
+        siblings: arr
+    }
+
+    Person.findOneAndUpdate({id: req.params.id}, update, {
+        new: true
+    },
+    function(err, response) {
+        if(err) {
+            return res.sendStatus(400)
+        }
+
+        res.send(response)
+    });
+
+})
+
+postRouter.get('/:id', function(req, res) {
+ 
+    Person.find({id: req.params.id}, (err, result) => {
+        res.send(result)
+    }).catch((err) => {
+        console.log(err)
+    })
+
+})
+
+postRouter.get('/search/:first/:last/:dob', function(req, res) {
+
+    console.log(req.params)
+
+    Person.find({first_name: { "$regex": req.params.first, "$options": "i" }}, (err, result) => {
+        console.log(result)
+        res.send(result)
+    }).catch((err) => {
+        console.log(err)
+    })
+
 })
 
 module.exports = postRouter

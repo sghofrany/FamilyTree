@@ -1,13 +1,22 @@
 import React, { useState, useEffect } from 'react';
+import {BrowserRouter as Router, Switch, Route, Link} from 'react-router-dom';
+import Person from './Person';
+import View from './View';
+
 function App() {
 
   return (
-    <div className="App">
-      <h1>Family Tree</h1>
+    <Router>
+      <div className="App">
+       
+       <Switch>
+         <Route path="/" exact component={Person} />
+         <Route path="/:id" component={View} />
+       </Switch>
 
-      
-
-    </div>
+      </div>
+    </Router>
+   
   );
 }
 
