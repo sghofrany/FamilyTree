@@ -18,7 +18,13 @@ const schema = new Schema({
         dob: {type: String},
         id: {type: String}
     },
-    siblings: [{
+    spouse: {
+        first_name: {type: String},
+        last_name: {type: String},
+        dob: {type: String},
+        id: {type: String}
+    },
+    children: [{
         first_name: {type: String},
         last_name: {type: String},
         dob: {type: String},

@@ -8,8 +8,6 @@ const { v4: uuidv4 } = require('uuid')
  */
 postRouter.use(function(req, res, next) {
 
-    console.log("middleware for authentication goes here.")
-
     /**
      * if(some form of auth) { next() } else { res.sendStatus(403) }
      */
@@ -45,7 +43,13 @@ postRouter.post('/create', function(req, res) {
             dob: "",
             id: ""
         },
-        siblings: []
+        spouse: {
+            first_name: "",
+            last_name: "",
+            dob: "",
+            id: ""
+        },
+        children: []
     })
 
     person.save(function(err) {
@@ -64,20 +68,34 @@ postRouter.post('/create', function(req, res) {
 
 postRouter.post('/update/:id', function(req, res) {
   
-    let siblings = req.body.siblings
+    let spouse = req.body.spouse
+    let father = req.body.father
+    let mother = req.body.mother
+    let children = req.body.children
+
+    spouse.id = handleEmptyId(spouse.id)
+    father.id = handleEmptyId(father.id)
+    mother.id = handleEmptyId(mother.id)
+ 
     let arr = []
 
-    for(var i = 0; i < siblings.length; i++) {
+    for(var i = 0; i < children.length; i++) {
+
+        children[i].id = handleEmptyId(children[i].id)
+
         arr.push({
-            first_name: siblings[i].first_name,
-            last_name: siblings[i].last_name,
-            dob: siblings[i].dob,
-            id: siblings[i].id
+            first_name: children[i].first_name,
+            last_name: children[i].last_name,
+            dob: children[i].dob,
+            id: children[i].id
         })
     }
 
     const update = {
-        siblings: arr
+        spouse: spouse,
+        father: father,
+        mother: mother,
+        children: arr
     }
 
     Person.findOneAndUpdate({id: req.params.id}, update, {
@@ -115,5 +133,13 @@ postRouter.get('/search/:first/:last/:dob', function(req, res) {
     })
 
 })
+
+function handleEmptyId(data) {
+    if(data.length === 0) {
+        return uuidv4()
+    }
+
+    return data
+}
 
 module.exports = postRouter

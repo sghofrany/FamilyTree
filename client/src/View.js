@@ -1,21 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom'
+import Modal from 'react-modal'
 import axios from 'axios'
 import { v4 as uuidv4 } from 'uuid';
 
+Modal.setAppElement('#root')
+
 function View({ match }) {
+
+    const [modalIsOpen, setIsOpen] = useState(false)
+    const [modalEdit, setModalEdit] = useState("")
+
+    const [shouldUpdate, setShouldUpdate] = useState(false)
 
     const [data, setData] = useState([])
     const [loading, setLoading] = useState(true)
     const [updating, setUpdating] = useState(false)
 
-    const [siblings, setSiblings] = useState([])
-    const [sibFirstName, setSibFirstName] = useState("")
-    const [sibLastName, setSibLastName] = useState("")
-    const [sibDob, setSibDob] = useState("")
+    const [children, setChildren] = useState([])
+    const [childFirstName, setChildFirstName] = useState("")
+    const [childLastName, setChildLastName] = useState("")
+    const [childDob, setChildDob] = useState("")
+    const [childId, setChildId] = useState("")
 
     const [searchFirst, setSearchFirst] = useState("")
     const [searchData, setSearchData] = useState([])
+    const [selectedData, setSelectedData] = useState(null)
+
+    const [editFirst, setEditFirst] = useState("")
+    const [editLast, setEditLast] = useState("")
+    const [editDob, setEditDob] = useState("")
+    const [editId, setEditId] = useState("")
+
+    const [spouse, setSpouse] = useState({first_name: "", last_name: "", dob: "", id: ""})
+    const [father, setFather] = useState({first_name: "", last_name: "", dob: "", id: ""})
+    const [mother, setMother] = useState({first_name: "", last_name: "", dob: "", id: ""})
 
     let history = useHistory()
 
@@ -29,7 +48,28 @@ function View({ match }) {
             console.log(response)
 
             setData(response.data);
-            setSiblings(response.data[0].siblings)
+            setChildren(response.data[0].children)
+            setSpouse({
+                first_name: response.data[0].spouse.first_name, 
+                last_name: response.data[0].spouse.last_name, 
+                dob: response.data[0].spouse.dob, 
+                id: response.data[0].spouse.id
+            })
+
+            setFather({
+                first_name: response.data[0].father.first_name, 
+                last_name: response.data[0].father.last_name, 
+                dob: response.data[0].father.dob, 
+                id: response.data[0].father.id
+            })
+
+            setMother({
+                first_name: response.data[0].mother.first_name, 
+                last_name: response.data[0].mother.last_name, 
+                dob: response.data[0].mother.dob, 
+                id: response.data[0].mother.id
+            })
+
             setLoading(false);  //make sure to set loading = false last, because your array will be undefined if you call it before setting your array.
   
         } catch (err) {
@@ -38,46 +78,62 @@ function View({ match }) {
         }
       }
 
-    useEffect(() => {
-        loadData()
-    }, []) 
-
-    const handleEmptyValue = (data) => {
-        if(data.length === 0) {
-            return "Empty"
-        }
-
-        return data
-    }
-
-    const handleAddSibling = () => {
-        if(sibFirstName.length === 0 || sibLastName.length === 0 || sibDob.length === 0) {
+    const handleAddChildren = () => {
+        if(childFirstName.length === 0 || childLastName.length === 0 || childDob.length === 0) {
             return console.log("must fill out all fields")
         }
 
-        setSiblings(prevSiblings => [...prevSiblings, {
-            first_name: sibFirstName,
-            last_name: sibLastName,
-            dob: sibDob,
-            id: uuidv4()
+        setChildren(prevChildren => [...prevChildren, {
+            first_name: childFirstName,
+            last_name: childLastName,
+            dob: childDob,
+            id: childId
         }])
 
     }
 
     const handleUpdateInformation = async () => {
 
-        setUpdating(true)
-        const url = `http://localhost:5000/api/update/${match.params.id}`
-        await axios.post(url, {
-            data: data,
-            siblings: siblings
-        })
+        setShouldUpdate(true)
 
-        setSibFirstName("")
-        setSibLastName("")
-        setSibDob("")
+        if(modalEdit === "SPOUSE") {
+            setSpouse({
+                first_name: editFirst,
+                last_name: editLast,
+                dob: editDob,
+                id: editId
+            })
 
-        setUpdating(false)
+            console.log("Spouse", spouse)
+
+        } else if(modalEdit === "FATHER") {
+            setFather({
+                first_name: editFirst,
+                last_name: editLast,
+                dob: editDob,
+                id: editId
+            })
+
+            console.log("Father", father)
+
+        } else if(modalEdit === "MOTHER") {
+            setMother({
+                first_name: editFirst,
+                last_name: editLast,
+                dob: editDob,
+                id: editId
+            })
+
+            console.log("Mother", mother)
+
+        }
+
+        let copy = children.slice()
+        setChildren(copy)
+
+        setChildFirstName("")
+        setChildLastName("")
+        setChildDob("")
 
     }
 
@@ -91,6 +147,72 @@ function View({ match }) {
         }
 
     }
+
+    const handleSearchSelect = (data) => {
+
+        console.log(data)
+
+        if(modalIsOpen) {
+
+            setEditFirst(data.first_name)
+            setEditLast(data.last_name)
+            setEditDob(data.dob)
+            setEditId(data.id)
+
+        } else {
+            setChildFirstName(data.first_name)
+            setChildLastName(data.last_name)
+            setChildDob(data.dob)
+            setChildId(data.id)
+        }
+
+    }
+
+    const openModal = (value) => {
+        setIsOpen(true)
+        setModalEdit(value)
+    }
+
+    const closeModal = () => {
+        setIsOpen(false)
+    }
+
+    useEffect(() => {
+        loadData()
+    }, []) 
+
+    useEffect( () => {
+
+        const update = async () => {
+            
+            setUpdating(true)
+
+            console.log("Updating", {
+                spouse: spouse,
+                father: father,
+                mother: mother,
+                children: children
+            })
+
+            const url = `http://localhost:5000/api/update/${match.params.id}`
+            await axios.post(url, {
+                data: data,
+                spouse: spouse,
+                father: father,
+                mother: mother,
+                children: children
+            })
+            
+            setUpdating(false)
+        }
+
+        if(shouldUpdate) {
+            update()
+            setShouldUpdate(false)
+        }
+        
+
+    }, [spouse, father, mother, children])
 
   return (
 
@@ -106,62 +228,107 @@ function View({ match }) {
                     <div>
                         <h3>{data[0].first_name} {data[0].last_name} {data[0].dob}</h3>
                     </div>
+
+                    <div>
+                        <h3>Spouse</h3>
+                        <span>{spouse.first_name} {spouse.last_name} {spouse.dob} {spouse.id}</span>
+                        <button onClick={() => openModal("SPOUSE") } >Edit</button>
+                    </div>
+
                 </div>
                 <hr/>
                 <div>
                     <h1>Parental Information</h1>
 
                     <div>
-                        <h3>Father {handleEmptyValue(data[0].father.first_name)} {handleEmptyValue(data[0].father.last_name)} {handleEmptyValue(data[0].father.dob)}</h3>
-                        <button>Edit</button>
+                        <span>{father.first_name} {father.last_name} {father.dob} {father.id}</span>
+                        <button onClick={() => openModal("FATHER") } >Edit</button>
                     </div>
 
                     <div>
-                        <h3>Mother {handleEmptyValue(data[0].mother.first_name)} {handleEmptyValue(data[0].mother.last_name)} {handleEmptyValue(data[0].mother.dob)}</h3>
-                        <button>Edit</button>
+                        <span>{mother.first_name} {mother.last_name} {mother.dob} {mother.id}</span>
+                        <button onClick={() => openModal("MOTHER") } >Edit</button>
                     </div>
                 </div>
                 <hr/>
                 <div>
-                    <h1>Sibling Information</h1>
+                    <h1>Children</h1>
 
                     <div>
                         
-                        {siblings.map(sib => (
-                            <div key={sib.id}>
-                                <span>{sib.first_name} </span>
-                                <span>{sib.last_name} </span>
-                                <span>{sib.dob} </span>
+                        {children.map(child => (
+                            <div key={child.id}>
+                                <span>{child.first_name} </span>
+                                <span>{child.last_name} </span>
+                                <span>{child.dob} </span>
+                                <span>{child.id} </span>
                             </div>
-                        ))}
+                        ))} 
 
-                        <input onChange={(e) => setSibFirstName(e.target.value)} value={sibFirstName} placeholder="first name"></input>
-                        <input onChange={(e) => setSibLastName(e.target.value)} value={sibLastName} placeholder="last name"></input>
-                        <input onChange={(e) => setSibDob(e.target.value)} value={sibDob} placeholder="date of birth"></input>
-                        <button onClick={ handleAddSibling }>Add</button>
+                        <input onChange={(e) => setChildFirstName(e.target.value)} value={childFirstName} placeholder="first name"></input>
+                        <input onChange={(e) => setChildLastName(e.target.value)} value={childLastName} placeholder="last name"></input>
+                        <input onChange={(e) => setChildDob(e.target.value)} value={childDob} placeholder="date of birth"></input>
+                        <button onClick={ handleAddChildren }>Add</button>
+                        
+                        <div>
+                            <input onChange={(e) => setSearchFirst(e.target.value)} value={searchFirst} placeholder="first name"></input>
+                            <button onClick={ searchCollection } >Search</button>
+                        
+                            {
+                                searchData.map(d => (
+                                    <div key={d.id}>
+                                        <span>{d.first_name} {d.last_name} {d.dob}</span>
+                                        <button onClick={ () => handleSearchSelect(d) }>Select</button>
+                                    </div>
+                                ))
+                            }
+                  
+                        </div>
                     </div>
                 </div>
-                <hr/>
-
+           
                 <button onClick={ handleUpdateInformation } disabled={updating}>Update</button>
 
                 <hr/>
-                <div>
-                    <h1>Search</h1>
-                    <input onChange={(e) => setSearchFirst(e.target.value)} value={searchFirst} placeholder="first name"></input>
-                    <button onClick={ searchCollection } >Search</button>
-                  
-                    {
-                        searchData.map(d => (
-                            <div key={d.id}>
-                                <span>{d.first_name} {d.last_name} {d.dob}</span>
-                            </div>
-                        ))
-                    }
-                  
-                </div>
+                
 
+                <Modal
+                isOpen={modalIsOpen}
+                onRequestClose={closeModal}
+                contentLabel={modalEdit}
+                >
+                    <h1>Modal Edit {modalEdit}</h1>
 
+                    <div>
+                        <input onChange={(e) => {setEditFirst(e.target.value)}} placeholder="first name" value={editFirst}></input>
+                        <input onChange={(e) => {setEditLast(e.target.value)}} placeholder="last name" value={editLast}></input>
+                        <input onChange={(e) => {setEditDob(e.target.value)}} placeholder="date of birth" value={editDob}></input>
+                    </div>
+
+                    <hr/>
+
+                    <h3>Or</h3>
+
+                    <hr/>
+
+                    <div>
+                        <input onChange={(e) => setSearchFirst(e.target.value)} value={searchFirst} placeholder="first name"></input>
+                        <button onClick={ searchCollection } >Search</button>
+                    
+                        {
+                            searchData.map(d => (
+                                <div key={d.id}>
+                                    <span>{d.first_name} {d.last_name} {d.dob}</span>
+                                    <button onClick={ () => handleSearchSelect({first_name: d.first_name, last_name: d.last_name, dob: d.dob, id: d.id}) }>Select</button>
+                                </div>
+                            ))
+                        }
+                  
+                    </div>
+
+                    <button onClick={ handleUpdateInformation } disabled={updating}>Update</button>
+                    <button onClick={closeModal}>Close</button>
+                </Modal>
                 
             </div>  
 
