@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom'
 import Modal from 'react-modal'
 import axios from 'axios'
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid'
+import {Link} from 'react-router-dom'
 
 Modal.setAppElement('#root')
 
@@ -25,8 +26,7 @@ function View({ match }) {
 
     const [searchFirst, setSearchFirst] = useState("")
     const [searchData, setSearchData] = useState([])
-    const [selectedData, setSelectedData] = useState(null)
-
+   
     const [editFirst, setEditFirst] = useState("")
     const [editLast, setEditLast] = useState("")
     const [editDob, setEditDob] = useState("")
@@ -44,6 +44,12 @@ function View({ match }) {
   
         try {
             const response = await axios.get(url);
+
+            if(response.data.length === 0) {
+                console.log("data length is 0")
+                history.push('/')
+                return
+            }
 
             console.log(response)
 
@@ -181,7 +187,7 @@ function View({ match }) {
         loadData()
     }, []) 
 
-    useEffect( () => {
+    useEffect(() => {
 
         const update = async () => {
             
@@ -231,7 +237,8 @@ function View({ match }) {
 
                     <div>
                         <h3>Spouse</h3>
-                        <span>{spouse.first_name} {spouse.last_name} {spouse.dob} {spouse.id}</span>
+                        <span>{spouse.first_name} {spouse.last_name} {spouse.dob}</span>
+                        <Link  to={`/${spouse.id}`}><p>Visit</p></Link>
                         <button onClick={() => openModal("SPOUSE") } >Edit</button>
                     </div>
 
