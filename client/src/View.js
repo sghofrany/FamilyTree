@@ -2,12 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom'
 import Modal from 'react-modal'
 import axios from 'axios'
-import { v4 as uuidv4 } from 'uuid'
 import {Link} from 'react-router-dom'
 
 Modal.setAppElement('#root')
 
-function View({ match }) {
+function View(props) {
 
     const [modalIsOpen, setIsOpen] = useState(false)
     const [modalEdit, setModalEdit] = useState("")
@@ -27,10 +26,7 @@ function View({ match }) {
     const [searchFirst, setSearchFirst] = useState("")
     const [searchData, setSearchData] = useState([])
    
-    const [editFirst, setEditFirst] = useState("")
-    const [editLast, setEditLast] = useState("")
-    const [editDob, setEditDob] = useState("")
-    const [editId, setEditId] = useState("")
+    const [editArray, setEditArray] = useState([])
 
     const [spouse, setSpouse] = useState({first_name: "", last_name: "", dob: "", id: ""})
     const [father, setFather] = useState({first_name: "", last_name: "", dob: "", id: ""})
@@ -40,18 +36,10 @@ function View({ match }) {
 
     async function loadData() {
         
-        const url = `http://localhost:5000/api/${match.params.id}`
+        const url = `http://localhost:5000/api/${props.match.params.id}`
   
         try {
             const response = await axios.get(url);
-
-            if(response.data.length === 0) {
-                console.log("data length is 0")
-                history.push('/')
-                return
-            }
-
-            console.log(response)
 
             setData(response.data);
             setChildren(response.data[0].children)
@@ -103,44 +91,107 @@ function View({ match }) {
         setShouldUpdate(true)
 
         if(modalEdit === "SPOUSE") {
+
+            if(editArray.length === 0) {
+                return console.log("There is no information to update")
+            }
+
             setSpouse({
-                first_name: editFirst,
-                last_name: editLast,
-                dob: editDob,
-                id: editId
+                first_name: editArray[0].first_name,
+                last_name: editArray[0].last_name,
+                dob: editArray[0].dob,
+                id: editArray[0].id
             })
 
             console.log("Spouse", spouse)
 
         } else if(modalEdit === "FATHER") {
+
+            if(editArray.length === 0) {
+                return console.log("There is no information to update")
+            }
+
             setFather({
-                first_name: editFirst,
-                last_name: editLast,
-                dob: editDob,
-                id: editId
+                first_name: editArray[0].first_name,
+                last_name: editArray[0].last_name,
+                dob: editArray[0].dob,
+                id: editArray[0].id
             })
 
             console.log("Father", father)
 
         } else if(modalEdit === "MOTHER") {
+
+            if(editArray.length === 0) {
+                return console.log("There is no information to update")
+            }
+
             setMother({
-                first_name: editFirst,
-                last_name: editLast,
-                dob: editDob,
-                id: editId
+                first_name: editArray[0].first_name,
+                last_name: editArray[0].last_name,
+                dob: editArray[0].dob,
+                id: editArray[0].id
             })
 
             console.log("Mother", mother)
 
+        } else if(modalEdit === "CHILDREN") {
+            
+            let arr = combinedArray(editArray, children)
+
+            setChildren(arr)
+
+            console.log("Children", children)
+
         }
 
-        let copy = children.slice()
-        setChildren(copy)
+        setEditArray([])
 
-        setChildFirstName("")
-        setChildLastName("")
-        setChildDob("")
+    }
 
+    const combinedArray = (arr1, arr2) => {
+
+        let val = arr2.slice()
+
+
+        //if editArray is length 0 return children
+
+        if(arr1.length === 0) return arr2
+
+        //if children is length 0 return editArray
+
+        if(arr2.length === 0) return arr1
+
+        for(var i = 0; i < arr1.length; i++) {
+
+            let curr = arr1[i]
+
+            for(var j = 0; j < arr2.length; j++) {
+
+                let add = arr2[j]
+    
+                if(curr.id !== add.id) {
+                    val.push(curr)
+                }
+    
+                
+            }
+
+        }
+
+        return val
+
+    }
+
+    const doesArrayContain = (arr, element) => {
+
+        for(var i = 0; i < arr.length; i++) {
+            if(arr[i].id === element.id) {
+                return true
+            }
+        }
+
+        return false
     }
 
     const searchCollection = async () => {
@@ -160,16 +211,21 @@ function View({ match }) {
 
         if(modalIsOpen) {
 
-            setEditFirst(data.first_name)
-            setEditLast(data.last_name)
-            setEditDob(data.dob)
-            setEditId(data.id)
+            if(modalEdit === "CHILDREN") {
 
-        } else {
-            setChildFirstName(data.first_name)
-            setChildLastName(data.last_name)
-            setChildDob(data.dob)
-            setChildId(data.id)
+                if(doesArrayContain(editArray, {id: data.id})) {
+                    return console.log("already contains this element")
+                }
+
+                setEditArray((prev) => [...prev, {first_name: data.first_name, last_name: data.last_name, dob: data.dob, id: data.id}])
+            } else if(modalEdit === "FATHER") {
+                setEditArray([{first_name: data.first_name, last_name: data.last_name, dob: data.dob, id: data.id}])
+            } else if(modalEdit === "MOTHER") {
+                setEditArray([{first_name: data.first_name, last_name: data.last_name, dob: data.dob, id: data.id}])
+            } else if(modalEdit === "SPOUSE") {
+                setEditArray([{first_name: data.first_name, last_name: data.last_name, dob: data.dob, id: data.id}])
+            }
+
         }
 
     }
@@ -180,7 +236,22 @@ function View({ match }) {
     }
 
     const closeModal = () => {
+        setEditArray([])
         setIsOpen(false)
+    }
+
+    const deleteChild = (id) => {
+        
+        let copy = children.slice()
+
+        for(var i = 0; i < copy.length; i++) {
+            if(copy[i].id === id) {
+                copy.splice(i, 1)
+            }
+        }
+
+        setChildren(copy)
+
     }
 
     useEffect(() => {
@@ -188,6 +259,8 @@ function View({ match }) {
     }, []) 
 
     useEffect(() => {
+
+        console.log("called")
 
         const update = async () => {
             
@@ -200,7 +273,7 @@ function View({ match }) {
                 children: children
             })
 
-            const url = `http://localhost:5000/api/update/${match.params.id}`
+            const url = `http://localhost:5000/api/update/${props.match.params.id}`
             await axios.post(url, {
                 data: data,
                 spouse: spouse,
@@ -272,30 +345,11 @@ function View({ match }) {
                             </div>
                         ))} 
 
-                        <input onChange={(e) => setChildFirstName(e.target.value)} value={childFirstName} placeholder="first name"></input>
-                        <input onChange={(e) => setChildLastName(e.target.value)} value={childLastName} placeholder="last name"></input>
-                        <input onChange={(e) => setChildDob(e.target.value)} value={childDob} placeholder="date of birth"></input>
-                        <button onClick={ handleAddChildren }>Add</button>
-                        
-                        <div>
-                            <input onChange={(e) => setSearchFirst(e.target.value)} value={searchFirst} placeholder="first name"></input>
-                            <button onClick={ searchCollection } >Search</button>
-                        
-                            {
-                                searchData.map(d => (
-                                    <div key={d.id}>
-                                        <span>{d.first_name} {d.last_name} {d.dob}</span>
-                                        <button onClick={ () => handleSearchSelect(d) }>Select</button>
-                                    </div>
-                                ))
-                            }
-                  
-                        </div>
+                        <button onClick={() => openModal("CHILDREN") } >Edit</button>
+
                     </div>
                 </div>
-           
-                <button onClick={ handleUpdateInformation } disabled={updating}>Update</button>
-
+        
                 <hr/>
                 
 
@@ -307,16 +361,27 @@ function View({ match }) {
                     <h1>Modal Edit {modalEdit}</h1>
 
                     <div>
-                        <input onChange={(e) => {setEditFirst(e.target.value)}} placeholder="first name" value={editFirst}></input>
-                        <input onChange={(e) => {setEditLast(e.target.value)}} placeholder="last name" value={editLast}></input>
-                        <input onChange={(e) => {setEditDob(e.target.value)}} placeholder="date of birth" value={editDob}></input>
+                        {
+                            modalEdit === "CHILDREN" ? children.map(child => (
+                                <div key={child.id}>
+                                    <span>{child.first_name} {child.last_name} {child.dob}</span>
+                                    <button onClick={ () => deleteChild(child.id) } >Delete</button>
+                                </div>
+                            )) 
+                            : modalEdit === "FATHER" ?
+                                <div>
+                                    <span>{father.first_name} {father.last_name} {father.dob}</span>
+                                </div>
+                            : modalEdit === "MOTHER" ?
+                            <div>
+                                <span>{mother.first_name} {mother.last_name} {mother.dob}</span>
+                            </div>
+                            :
+                            <div>
+                                <span>{spouse.first_name} {spouse.last_name} {spouse.dob}</span>
+                            </div>
+                        }
                     </div>
-
-                    <hr/>
-
-                    <h3>Or</h3>
-
-                    <hr/>
 
                     <div>
                         <input onChange={(e) => setSearchFirst(e.target.value)} value={searchFirst} placeholder="first name"></input>
@@ -334,7 +399,21 @@ function View({ match }) {
                     </div>
 
                     <button onClick={ handleUpdateInformation } disabled={updating}>Update</button>
-                    <button onClick={closeModal}>Close</button>
+                    <button onClick={ closeModal }>Close</button>
+                    <Link  to="/">Create</Link>
+
+                    <div>
+                        <h1>Selected</h1>
+                        {
+                           editArray.map(d => (
+                            <div key={d.id}>
+                                <span>{d.first_name} {d.last_name} {d.dob}</span>
+                            </div>
+                        )) 
+                        }
+                    </div>
+
+
                 </Modal>
                 
             </div>  

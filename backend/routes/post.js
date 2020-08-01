@@ -24,7 +24,9 @@ postRouter.post('/create', function(req, res) {
     var firstName = req.body.firstName
     var lastName = req.body.lastName
     var dob = req.body.dob
-    var id = uuidv4()
+    var id = handleEmptyId(req.body.id)
+
+    console.log(firstName, lastName, dob, id)
 
     var person = new Person({
         first_name: firstName,
@@ -73,41 +75,40 @@ postRouter.post('/update/:id', function(req, res) {
     let mother = req.body.mother
     let children = req.body.children
 
-    spouse.id = handleEmptyId(spouse.id)
-    father.id = handleEmptyId(father.id)
-    mother.id = handleEmptyId(mother.id)
- 
-    let arr = []
+    Person.find({id: req.params.id}, (err, result) => {
+    
+        if(result.length > 0) {
 
-    for(var i = 0; i < children.length; i++) {
+            let doc = result[0]
 
-        children[i].id = handleEmptyId(children[i].id)
+            let combined = combinedArray(children, doc.children)
 
-        arr.push({
-            first_name: children[i].first_name,
-            last_name: children[i].last_name,
-            dob: children[i].dob,
-            id: children[i].id
-        })
-    }
+            const update = {
+                spouse: spouse,
+                father: father,
+                mother: mother,
+                children: combined
+            }
 
-    const update = {
-        spouse: spouse,
-        father: father,
-        mother: mother,
-        children: arr
-    }
+            Person.findOneAndUpdate({id: req.params.id}, update, {
+                new: true
+            },
+            function(err, response) {
+                if(err) {
+                    return res.sendStatus(400)
+                }
+        
+                res.send(response)
+            });
 
-    Person.findOneAndUpdate({id: req.params.id}, update, {
-        new: true
-    },
-    function(err, response) {
-        if(err) {
-            return res.sendStatus(400)
         }
 
-        res.send(response)
-    });
+    }).catch((err) => {
+        console.log(err)
+    })
+
+
+
 
 })
 
@@ -123,10 +124,7 @@ postRouter.get('/:id', function(req, res) {
 
 postRouter.get('/search/:first/:last/:dob', function(req, res) {
 
-    console.log(req.params)
-
-    Person.find({first_name: { "$regex": req.params.first, "$options": "i" }}, (err, result) => {
-        console.log(result)
+    Person.find({first_name: { "$regex": req.params.first, "$options": "i" }}, (err, result) => { 
         res.send(result)
     }).catch((err) => {
         console.log(err)
@@ -140,6 +138,40 @@ function handleEmptyId(data) {
     }
 
     return data
+}
+
+const combinedArray = (arr1, arr2) => {
+
+    let val = arr2.slice()
+
+
+    //if editArray is length 0 return children
+
+    if(arr1.length === 0) return arr2
+
+    //if children is length 0 return editArray
+
+    if(arr2.length === 0) return arr1
+
+    for(var i = 0; i < arr1.length; i++) {
+
+        let curr = arr1[i]
+
+        for(var j = 0; j < arr2.length; j++) {
+
+            let add = arr2[j]
+
+            if(curr.id !== add.id) {
+                val.push(curr)
+            }
+
+            
+        }
+
+    }
+
+    return val
+
 }
 
 module.exports = postRouter
