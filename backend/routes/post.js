@@ -104,9 +104,6 @@ postRouter.post('/update/:id', function(req, res) {
         console.log(err)
     })
 
-
-
-
 })
 
 postRouter.get('/:id', function(req, res) {
@@ -119,60 +116,17 @@ postRouter.get('/:id', function(req, res) {
 
 })
 
-postRouter.get('/search/:first/:last/:dob', function(req, res) {
+postRouter.get('/search/:dob', function(req, res) {
 
-    Person.find({first_name: { "$regex": req.params.first, "$options": "i" }}, (err, result) => { 
+    let fixedDate = req.params.dob.split('-').join('/')
+
+    Person.find({dob: { "$regex": fixedDate, "$options": "i" }}, (err, result) => { 
         res.send(result)
     }).catch((err) => {
         console.log(err)
     })
 
 })
-
-function handleEmptyId(data) {
-
-    console.log(data)
-
-    if(data.length === 0) {
-        return uuidv4()
-    }
-
-    return data
-}
-
-const combinedArray = (arr1, arr2) => {
-
-    let val = arr2.slice()
-
-
-    //if editArray is length 0 return children
-
-    if(arr1.length === 0) return arr2
-
-    //if children is length 0 return editArray
-
-    if(arr2.length === 0) return arr1
-
-    for(var i = 0; i < arr1.length; i++) {
-
-        let curr = arr1[i]
-
-        for(var j = 0; j < arr2.length; j++) {
-
-            let add = arr2[j]
-
-            if(curr.id !== add.id) {
-                val.push(curr)
-            }
-
-            
-        }
-
-    }
-
-    return val
-
-}
 
 const doesArrayContain = (arr, id) => {
 
