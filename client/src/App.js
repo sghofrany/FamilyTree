@@ -13,7 +13,7 @@ function App() {
        
        <Switch>
          <Route path="/" exact component={Person} />
-         <Route path="/:id" render={(props) => <View {...props} key={uuidv4()} />} />
+         <Route path="/:id" render={(props) => <View {...props} key={props.match.params.id} />} />
        </Switch>
        
       </div>

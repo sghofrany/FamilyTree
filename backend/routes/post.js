@@ -24,9 +24,7 @@ postRouter.post('/create', function(req, res) {
     var firstName = req.body.firstName
     var lastName = req.body.lastName
     var dob = req.body.dob
-    var id = handleEmptyId(req.body.id)
-
-    console.log(firstName, lastName, dob, id)
+    var id = uuidv4()
 
     var person = new Person({
         first_name: firstName,
@@ -75,19 +73,18 @@ postRouter.post('/update/:id', function(req, res) {
     let mother = req.body.mother
     let children = req.body.children
 
+
     Person.find({id: req.params.id}, (err, result) => {
     
         if(result.length > 0) {
 
-            let doc = result[0]
-
-            let combined = combinedArray(children, doc.children)
+            let arr = cleanArray(children)
 
             const update = {
                 spouse: spouse,
                 father: father,
                 mother: mother,
-                children: combined
+                children: arr
             }
 
             Person.findOneAndUpdate({id: req.params.id}, update, {
@@ -133,6 +130,9 @@ postRouter.get('/search/:first/:last/:dob', function(req, res) {
 })
 
 function handleEmptyId(data) {
+
+    console.log(data)
+
     if(data.length === 0) {
         return uuidv4()
     }
@@ -169,6 +169,45 @@ const combinedArray = (arr1, arr2) => {
         }
 
     }
+
+    return val
+
+}
+
+const doesArrayContain = (arr, id) => {
+
+    for(var i = 0; i < arr.length; i++) {
+        if(arr[i].id === id) {
+            return true
+        }
+    }
+
+    return false
+}
+
+const cleanArray = (arr) => {
+    
+    let val = []
+
+    if(arr.length === 0) {
+        console.log("arr length is 0")
+        return []
+    }
+
+    for(var i = 0; i < arr.length; i++) {
+
+        var id = arr[i].id
+
+        if(!doesArrayContain(val, id)) {
+            console.log("doesnt contain", id)
+            val.push(arr[i])
+        } else {
+            console.log("contains", id)
+        }
+
+    }
+
+    console.log(val)
 
     return val
 

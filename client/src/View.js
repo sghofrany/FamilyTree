@@ -18,10 +18,6 @@ function View(props) {
     const [updating, setUpdating] = useState(false)
 
     const [children, setChildren] = useState([])
-    const [childFirstName, setChildFirstName] = useState("")
-    const [childLastName, setChildLastName] = useState("")
-    const [childDob, setChildDob] = useState("")
-    const [childId, setChildId] = useState("")
 
     const [searchFirst, setSearchFirst] = useState("")
     const [searchData, setSearchData] = useState([])
@@ -33,58 +29,6 @@ function View(props) {
     const [mother, setMother] = useState({first_name: "", last_name: "", dob: "", id: ""})
 
     let history = useHistory()
-
-    async function loadData() {
-        
-        const url = `http://localhost:5000/api/${props.match.params.id}`
-  
-        try {
-            const response = await axios.get(url);
-
-            setData(response.data);
-            setChildren(response.data[0].children)
-            setSpouse({
-                first_name: response.data[0].spouse.first_name, 
-                last_name: response.data[0].spouse.last_name, 
-                dob: response.data[0].spouse.dob, 
-                id: response.data[0].spouse.id
-            })
-
-            setFather({
-                first_name: response.data[0].father.first_name, 
-                last_name: response.data[0].father.last_name, 
-                dob: response.data[0].father.dob, 
-                id: response.data[0].father.id
-            })
-
-            setMother({
-                first_name: response.data[0].mother.first_name, 
-                last_name: response.data[0].mother.last_name, 
-                dob: response.data[0].mother.dob, 
-                id: response.data[0].mother.id
-            })
-
-            setLoading(false);  //make sure to set loading = false last, because your array will be undefined if you call it before setting your array.
-  
-        } catch (err) {
-            console.log("fetch failed", err);
-            // history.push(`/error`)
-        }
-      }
-
-    const handleAddChildren = () => {
-        if(childFirstName.length === 0 || childLastName.length === 0 || childDob.length === 0) {
-            return console.log("must fill out all fields")
-        }
-
-        setChildren(prevChildren => [...prevChildren, {
-            first_name: childFirstName,
-            last_name: childLastName,
-            dob: childDob,
-            id: childId
-        }])
-
-    }
 
     const handleUpdateInformation = async () => {
 
@@ -102,8 +46,6 @@ function View(props) {
                 dob: editArray[0].dob,
                 id: editArray[0].id
             })
-
-            console.log("Spouse", spouse)
 
         } else if(modalEdit === "FATHER") {
 
@@ -133,16 +75,8 @@ function View(props) {
                 id: editArray[0].id
             })
 
-            console.log("Mother", mother)
-
         } else if(modalEdit === "CHILDREN") {
-            
-            let arr = combinedArray(editArray, children)
-
-            setChildren(arr)
-
-            console.log("Children", children)
-
+            setChildren(editArray)
         }
 
         setEditArray([])
@@ -183,10 +117,10 @@ function View(props) {
 
     }
 
-    const doesArrayContain = (arr, element) => {
+    const doesArrayContain = (arr, id) => {
 
         for(var i = 0; i < arr.length; i++) {
-            if(arr[i].id === element.id) {
+            if(arr[i].id === id) {
                 return true
             }
         }
@@ -207,13 +141,11 @@ function View(props) {
 
     const handleSearchSelect = (data) => {
 
-        console.log(data)
-
         if(modalIsOpen) {
 
             if(modalEdit === "CHILDREN") {
 
-                if(doesArrayContain(editArray, {id: data.id})) {
+                if(doesArrayContain(editArray, data.id)) {
                     return console.log("already contains this element")
                 }
 
@@ -242,7 +174,7 @@ function View(props) {
 
     const deleteChild = (id) => {
         
-        let copy = children.slice()
+        let copy = editArray.slice()
 
         for(var i = 0; i < copy.length; i++) {
             if(copy[i].id === id) {
@@ -250,32 +182,72 @@ function View(props) {
             }
         }
 
-        setChildren(copy)
+        setEditArray(copy)
 
     }
 
     useEffect(() => {
-        loadData()
-    }, []) 
+
+        async function loadData(id) {
+        
+            const url = `http://localhost:5000/api/${id}`
+      
+            try {
+                const response = await axios.get(url);
+
+                console.log('children1', children, response.data[0].children)
+
+                setData(response.data);
+                
+                setChildren(response.data[0].children)
+                
+                setSpouse({
+                    first_name: response.data[0].spouse.first_name, 
+                    last_name: response.data[0].spouse.last_name, 
+                    dob: response.data[0].spouse.dob, 
+                    id: response.data[0].spouse.id
+                })
+    
+                setFather({
+                    first_name: response.data[0].father.first_name, 
+                    last_name: response.data[0].father.last_name, 
+                    dob: response.data[0].father.dob, 
+                    id: response.data[0].father.id
+                })
+    
+                setMother({
+                    first_name: response.data[0].mother.first_name, 
+                    last_name: response.data[0].mother.last_name, 
+                    dob: response.data[0].mother.dob, 
+                    id: response.data[0].mother.id
+                })
+    
+                setLoading(false);  //make sure to set loading = false last, because your array will be undefined if you call it before setting your array.
+      
+            } catch (err) {
+                console.log("fetch failed", err);
+                // history.push(`/error`)
+            }
+        }
+
+        loadData(props.match.params.id)
+
+        return function() {
+            console.log("unmount")
+        }
+
+    }, [props.match.params.id]) 
 
     useEffect(() => {
 
-        console.log("called")
-
         const update = async () => {
             
-            setUpdating(true)
+            console.log("Sending update request")
 
-            console.log("Updating", {
-                spouse: spouse,
-                father: father,
-                mother: mother,
-                children: children
-            })
+            setUpdating(true)
 
             const url = `http://localhost:5000/api/update/${props.match.params.id}`
             await axios.post(url, {
-                data: data,
                 spouse: spouse,
                 father: father,
                 mother: mother,
@@ -291,7 +263,19 @@ function View(props) {
         }
         
 
-    }, [spouse, father, mother, children])
+    }, [spouse, father, mother, children, shouldUpdate])
+
+    useEffect(() => {
+
+        if(modalIsOpen) {
+            if(modalEdit === "CHILDREN") {
+
+                setEditArray(children)
+    
+            }
+        }
+
+    }, [modalIsOpen, modalEdit])
 
   return (
 
@@ -321,12 +305,18 @@ function View(props) {
                     <h1>Parental Information</h1>
 
                     <div>
-                        <span>{father.first_name} {father.last_name} {father.dob} {father.id}</span>
+                        <span>{father.first_name} </span>
+                        <span>{father.last_name} </span>
+                        <span>{father.dob} </span>
+                        <span><Link  to={`/${father.id}`}>Visit</Link></span>
                         <button onClick={() => openModal("FATHER") } >Edit</button>
                     </div>
 
                     <div>
-                        <span>{mother.first_name} {mother.last_name} {mother.dob} {mother.id}</span>
+                        <span>{mother.first_name} </span>
+                        <span>{mother.last_name} </span>
+                        <span>{mother.dob} </span>
+                        <span><Link  to={`/${mother.id}`}>Visit</Link></span>
                         <button onClick={() => openModal("MOTHER") } >Edit</button>
                     </div>
                 </div>
@@ -341,7 +331,7 @@ function View(props) {
                                 <span>{child.first_name} </span>
                                 <span>{child.last_name} </span>
                                 <span>{child.dob} </span>
-                                <span>{child.id} </span>
+                                <span><Link  to={`/${child.id}`}>Visit</Link></span>
                             </div>
                         ))} 
 
@@ -365,7 +355,6 @@ function View(props) {
                             modalEdit === "CHILDREN" ? children.map(child => (
                                 <div key={child.id}>
                                     <span>{child.first_name} {child.last_name} {child.dob}</span>
-                                    <button onClick={ () => deleteChild(child.id) } >Delete</button>
                                 </div>
                             )) 
                             : modalEdit === "FATHER" ?
@@ -408,6 +397,7 @@ function View(props) {
                            editArray.map(d => (
                             <div key={d.id}>
                                 <span>{d.first_name} {d.last_name} {d.dob}</span>
+                                <button onClick={ () => deleteChild(d.id) } >Delete</button>
                             </div>
                         )) 
                         }
