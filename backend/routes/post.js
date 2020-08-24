@@ -116,11 +116,9 @@ postRouter.get('/:id', function(req, res) {
 
 })
 
-postRouter.get('/search/:dob', function(req, res) {
+postRouter.get('/search/:first', function(req, res) {
 
-    let fixedDate = req.params.dob.split('-').join('/')
-
-    Person.find({dob: { "$regex": fixedDate, "$options": "i" }}, (err, result) => { 
+    Person.find({first_name: { "$regex": req.params.first, "$options": "i" }}, (err, result) => { 
         res.send(result)
     }).catch((err) => {
         console.log(err)

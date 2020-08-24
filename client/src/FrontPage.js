@@ -2,14 +2,16 @@ import React, { useState } from 'react';
 import { useHistory, Link } from 'react-router-dom'
 import axios from 'axios'
 import moment from 'moment'
+import './styles/style.css'
+import logo from './logos/logo_transparent.png'
 
-function Person() {
+function FrontPage() {
 
     const [firstName, setFirstName] = useState("")
     const [lastName, setLastName] = useState("")
     const [dob, setDob] = useState("")
 
-    const [searchDob, setSearchDob] = useState("")
+    const [searchFirst, setSearchFirst] = useState("")
     const [searchData, setSearchData] = useState([])
 
     const [loading, setLoading] = useState(false)
@@ -58,17 +60,11 @@ function Person() {
 
     const searchCollection = async () => {
         
-        if(searchDob.length === 0) {
+        if(searchFirst.length === 0) {
             return console.log("Search input is empty")
         }
 
-        if(!moment(searchDob, 'MM/DD/YYYY',true).isValid()) {
-            return console.log("date of birth is not valid")
-        }
-
-        let fixedDate = searchDob.split('/').join('-')
-
-        const url = `http://localhost:5000/api/search/${fixedDate}`
+        const url = `http://localhost:5000/api/search/${searchFirst}`
         let response = await axios.get(url)
 
         if(response.status === 200) {
@@ -78,21 +74,47 @@ function Person() {
     }
 
     return (
-        <div>
-            <h1>Create a New Leaf</h1>
+        <div className="wrapper">
+            <h1 className="title">Family Tree</h1>
 
-            <input onChange = { handleFirstChange } value={firstName} placeholder="first name"></input>
-            <input onChange = { handleLastChange } value={lastName} placeholder="last name"></input>
-            <input onChange = { handleDobChange } value={dob} placeholder="mm/dd/yyyy"></input>
-            <button onClick = { handleAddButton } disabled={loading}>Add</button>
+            <div className="create-wrapper">
 
-            <div>
-                <input onChange={(e) => setSearchDob(e.target.value)} value={searchDob} placeholder="MM/DD/YYYY"></input>
-                <button onClick={ searchCollection } >Search</button>
+                <p className="subtitle">Add a Family Member</p>
+
+                <div>
+                    <p>First Name</p>
+                    <input onChange = { handleFirstChange } value={firstName} placeholder="first name"></input>
+                </div>
+                
+                <div>
+                    <p>Last Name</p>
+                    <input onChange = { handleLastChange } value={lastName} placeholder="last name"></input>
+                </div>
+
+                <div>
+                    <p>Birthday</p>
+                    <input onChange = { handleDobChange } value={dob} placeholder="mm/dd/yyyy"></input>
+                </div>
+
+                <button className="button" onClick = { handleAddButton } disabled={loading}>Add</button>
+            </div>
             
+            <hr/>
+
+            <div className="search-wrapper">
+
+                <p className="subtitle">Search for a Family Member</p>
+
+                <div>
+                    <p>First Name</p>
+                    <input onChange={(e) => setSearchFirst(e.target.value)} value={searchFirst} placeholder="first name"></input>
+                </div>
+
+                <button className="button" onClick={ searchCollection } >Search</button>
+                
                 {
                     searchData.map(d => (
-                        <div key={d.id}>
+                        <div className="search-item" key={d.id}>
                             <span>{d.first_name} {d.last_name} {d.dob}</span>
                             <Link  to={`/${d.id}`}>Visit</Link>
                         </div>
@@ -104,4 +126,4 @@ function Person() {
     );
 }
 
-export default Person;
+export default FrontPage;

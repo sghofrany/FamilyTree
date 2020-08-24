@@ -1,0 +1,123 @@
+@import url('https://fonts.googleapis.com/css2?family=Alata&display=swap');
+
+:root {
+    --button-color: #33c054;
+    --button-color-hover: #0a7e25;
+}
+
+body {
+    margin: 0;
+    background-color: #fff;
+}
+
+* {
+    font-family: 'Alata', sans-serif;
+    color: #525252;
+}
+
+.wrapper {
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: 30%;
+    margin-right: 30%;
+    height: 100vh;
+    background-color: rgb(245, 245, 245);
+    
+    overflow: auto;
+}
+
+.wrapper hr {
+    margin: 5% 5%;
+    border-color: var(--button-color);
+}
+
+.create-wrapper {
+    margin: 5% 5%;
+}
+
+.create-wrapper p {
+    margin-bottom: 0px;
+}
+
+.create-wrapper button {
+    margin-top: 16px;
+    margin-bottom: 16px;
+}
+
+.search-wrapper {
+    margin: 5% 5%;
+}
+
+.search-wrapper button {
+    margin-top: 16px;
+    margin-bottom: 16px;
+}
+
+.search-wrapper p {
+    margin-bottom: 0px;
+}
+
+.title {
+    color: var(--button-color);
+    font-style: italic;
+    text-align: center;
+}
+
+.subtitle {
+    color: var(--button-color);
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.button { 
+    background-color: white;
+    color: var(--button-color);
+    border: 2px solid;
+    border-radius: 5px;
+    padding: 5px 15px;
+    transition: color 300ms;
+}
+
+.button:hover {
+    color: var(--button-color-hover);
+    cursor: pointer;
+}
+
+.search-item {
+    width: 100%;
+    margin: 5px 0px;
+    border: 2px solid var(--button-color);
+    border-radius: 5px;
+    background-color: white;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.search-item span {
+    margin-left: 10px;
+}
+
+.search-item a {
+    float: right;
+    margin-right: 10px;
+    text-decoration: none;
+    color: var(--button-color);
+    transition: color 300ms;
+}
+
+.search-item a:hover {
+    color: var(--button-color-hover);
+}
+
+
+input {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    border: 2px solid;
+    border-radius: 5px;
+}
+
+input:focus {
+    outline: none;
+    border-color:var(--button-color);
+}

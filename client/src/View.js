@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useHistory, Link } from 'react-router-dom'
 import Modal from 'react-modal'
 import axios from 'axios'
-import moment from 'moment'
 
 Modal.setAppElement('#root')
 
@@ -19,7 +18,7 @@ function View(props) {
 
     const [children, setChildren] = useState([])
 
-    const [searchDob, setSearchDob] = useState("")
+    const [searchFirst, setSearchFirst] = useState("")
     const [searchData, setSearchData] = useState([])
    
     const [editArray, setEditArray] = useState([])
@@ -96,17 +95,11 @@ function View(props) {
 
     const searchCollection = async () => {
         
-        if(searchDob.length === 0) {
+        if(searchFirst.length === 0) {
             return console.log("Search input is empty")
         }
 
-        if(!moment(searchDob, 'MM/DD/YYYY',true).isValid()) {
-            return console.log("date of birth is not valid")
-        }
-
-        let fixedDate = searchDob.split('/').join('-')
-
-        const url = `http://localhost:5000/api/search/${fixedDate}`
+        const url = `http://localhost:5000/api/search/${searchFirst}`
         let response = await axios.get(url)
 
         if(response.status === 200) {
@@ -349,7 +342,7 @@ function View(props) {
                     </div>
 
                     <div>
-                        <input onChange={(e) => setSearchDob(e.target.value)} value={searchDob} placeholder="DOB: MM/DD/YYYY"></input>
+                        <input onChange={(e) => setSearchFirst(e.target.value)} value={searchFirst} placeholder="DOB: MM/DD/YYYY"></input>
                         <button onClick={ searchCollection } >Search</button>
                     
                         {
