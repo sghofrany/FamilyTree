@@ -248,7 +248,7 @@ function View(props) {
 
   return (
 
-    <div className="View">
+    <div className="wrapper">
 
         {
             loading ? "" :
@@ -263,8 +263,14 @@ function View(props) {
 
                     <div>
                         <h3>Spouse</h3>
-                        <span>{spouse.first_name} {spouse.last_name} {spouse.dob}</span>
-                        <Link  to={`/${spouse.id}`}><p>Visit</p></Link>
+                        {
+                            spouse.id.length === 0 ? "" :
+                            <div>
+                                <span>{spouse.first_name} {spouse.last_name} {spouse.dob} </span>
+                                <span><Link  to={`/${spouse.id}`}>Visit</Link></span>
+                            </div>
+                        }
+                        
                         <button onClick={() => openModal("SPOUSE") } >Edit</button>
                     </div>
 
@@ -342,7 +348,7 @@ function View(props) {
                     </div>
 
                     <div>
-                        <input onChange={(e) => setSearchFirst(e.target.value)} value={searchFirst} placeholder="DOB: MM/DD/YYYY"></input>
+                        <input onChange={(e) => setSearchFirst(e.target.value)} value={searchFirst} placeholder="first name"></input>
                         <button onClick={ searchCollection } >Search</button>
                     
                         {
