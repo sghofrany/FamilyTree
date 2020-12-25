@@ -39,7 +39,7 @@ function FrontPage() {
 
         setLoading(true)
 
-        axios.post(`http://localhost:5000/api/create/`, {
+        axios.post(`https://ghofrany.herokuapp.com/api/create/`, {
             firstName: firstName,
             lastName: lastName,
             dob: dob
@@ -64,7 +64,7 @@ function FrontPage() {
             return console.log("Search input is empty")
         }
 
-        const url = `http://localhost:5000/api/search/${searchFirst}`
+        const url = `https://ghofrany.herokuapp.com/api/search/${searchFirst}`
         let response = await axios.get(url)
 
         if(response.status === 200) {

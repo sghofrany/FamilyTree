@@ -99,7 +99,7 @@ function View(props) {
             return console.log("Search input is empty")
         }
 
-        const url = `http://localhost:5000/api/search/${searchFirst}`
+        const url = `https://ghofrany.herokuapp.com/api/search/${searchFirst}`
         let response = await axios.get(url)
 
         if(response.status === 200) {
@@ -159,7 +159,7 @@ function View(props) {
 
         async function loadData(id) {
         
-            const url = `http://localhost:5000/api/${id}`
+            const url = `https://ghofrany.herokuapp.com/api/${id}`
       
             try {
                 const response = await axios.get(url);
@@ -215,7 +215,7 @@ function View(props) {
 
             setUpdating(true)
 
-            const url = `http://localhost:5000/api/update/${props.match.params.id}`
+            const url = `https://ghofrany.herokuapp.com/api/update/${props.match.params.id}`
             await axios.post(url, {
                 spouse: spouse,
                 father: father,
