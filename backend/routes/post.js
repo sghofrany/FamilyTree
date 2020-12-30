@@ -73,7 +73,6 @@ postRouter.post('/update/:id', function(req, res) {
     let mother = req.body.mother
     let children = req.body.children
 
-
     Person.find({id: req.params.id}, (err, result) => {
     
         if(result.length > 0) {
@@ -102,6 +101,21 @@ postRouter.post('/update/:id', function(req, res) {
 
     }).catch((err) => {
         console.log(err)
+    })
+
+})
+
+
+postRouter.post('/delete/:id', function(req, res) {
+
+    Person.find({id: req.params.id}, (err, result) => {
+
+        if(result.length <= 0) return console.log("no document found by that id");
+
+        let id = req.params.id;
+
+        Person.deleteOne()
+
     })
 
 })
